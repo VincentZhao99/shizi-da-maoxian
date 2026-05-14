@@ -2,6 +2,7 @@ node_modules/
 dist/
 project.private.config.json
 .claude/
+.idea/
 .swc/
 # 系统文件
 .DS_Store
