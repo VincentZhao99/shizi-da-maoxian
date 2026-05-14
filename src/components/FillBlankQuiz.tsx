@@ -8,12 +8,16 @@ export function FillBlankQuiz({
   sentence,
   options,
   correct,
-  onPass
+  onPass,
+  onNext,
+  nextLabel = '下一题'
 }: {
   sentence: string
   options: string[]
   correct: string
   onPass: () => void
+  onNext?: () => void
+  nextLabel?: string
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [passed, setPassed] = useState(false)
@@ -53,7 +57,15 @@ export function FillBlankQuiz({
           <Text className="text-base font-extrabold text-[#A61B1B]">再试一次～</Text>
         </View>
       ) : null}
+
+      {status === 'correct' && onNext ? (
+        <View
+          className="mt-4 rounded-2xl bg-brand-blue px-5 py-3 active:opacity-80"
+          onClick={onNext}
+        >
+          <Text className="text-base font-extrabold text-white">{nextLabel}</Text>
+        </View>
+      ) : null}
     </View>
   )
 }
-

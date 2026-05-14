@@ -1,3 +1,3 @@
 export default definePageConfig({
-  navigationBarTitleText: '第 1 关'
+  navigationBarTitleText: '识字大冒险'
 })

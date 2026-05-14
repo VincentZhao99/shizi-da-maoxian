@@ -3,16 +3,34 @@ import { View, Text } from '@tarojs/components'
 import { useState } from 'react'
 import { CategoryCard } from '../../components/CategoryCard'
 import { ProgressStars } from '../../components/ProgressStars'
+import { chineseLevels, mathLevels } from '../../data/lexicons'
+import { getProgressKey, getStarsKey } from '../../domain/progress'
 
 const TOTAL_STARS = 5
-const STORAGE_KEY = 'todayStars'
+
+function loadPosition(category: string) {
+  try {
+    const raw = Taro.getStorageSync(getProgressKey(category))
+    if (raw) {
+      const p = JSON.parse(raw)
+      if (typeof p.levelIndex === 'number' && typeof p.itemIndex === 'number') {
+        return { level: p.levelIndex, item: p.itemIndex }
+      }
+    }
+  } catch { /* ignore */ }
+  return { level: 0, item: 0 }
+}
 
 export default function Home() {
   const [stars, setStars] = useState(0)
+  const [mathPos, setMathPos] = useState(() => loadPosition('math'))
+  const [chinesePos, setChinesePos] = useState(() => loadPosition('chinese'))
 
   useDidShow(() => {
-    const v = Number(Taro.getStorageSync(STORAGE_KEY) || 0)
+    const v = Number(Taro.getStorageSync(getStarsKey()) || 0)
     setStars(Number.isFinite(v) ? v : 0)
+    setMathPos(loadPosition('math'))
+    setChinesePos(loadPosition('chinese'))
   })
 
   return (
@@ -33,13 +51,23 @@ export default function Home() {
           title="数学探险"
           subtitle="功能字闯关"
           color="#5CC8FF"
-          onClick={() => Taro.navigateTo({ url: '/pages/level/index?category=math&level=0&item=0' })}
+          progress={`第 ${mathPos.level + 1}/${mathLevels.length} 关`}
+          onClick={() =>
+            Taro.navigateTo({
+              url: `/pages/level/index?category=math&level=${mathPos.level}&item=${mathPos.item}`
+            })
+          }
         />
         <CategoryCard
           title="语文宝库"
           subtitle="生字闯关"
           color="#B79CFF"
-          onClick={() => Taro.navigateTo({ url: '/pages/level/index?category=chinese&level=0&item=0' })}
+          progress={`第 ${chinesePos.level + 1}/${chineseLevels.length} 关`}
+          onClick={() =>
+            Taro.navigateTo({
+              url: `/pages/level/index?category=chinese&level=${chinesePos.level}&item=${chinesePos.item}`
+            })
+          }
         />
       </View>
 

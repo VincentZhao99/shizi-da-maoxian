@@ -4,11 +4,13 @@ export function CategoryCard({
   title,
   subtitle,
   color,
+  progress,
   onClick
 }: {
   title: string
   subtitle: string
   color: string
+  progress?: string
   onClick: () => void
 }) {
   return (
@@ -21,6 +23,11 @@ export function CategoryCard({
       <Text className="mt-2 block text-base font-semibold text-[#1E1E1E] opacity-80">
         {subtitle}
       </Text>
+      {progress ? (
+        <Text className="mt-2 block text-sm font-bold text-[#1E1E1E] opacity-70">
+          {progress}
+        </Text>
+      ) : null}
     </View>
   )
 }
