@@ -6,10 +6,10 @@ function flattenHanzi() {
 }
 
 describe('chineseLevels', () => {
-  it('has exactly 50 unique hanzi', () => {
+  it('has exactly 200 unique hanzi', () => {
     const all = flattenHanzi()
-    expect(all.length).toBe(50)
-    expect(new Set(all).size).toBe(50)
+    expect(all.length).toBe(200)
+    expect(new Set(all).size).toBe(200)
   })
 
   it('contains the provided first three levels (sample)', () => {
@@ -21,6 +21,18 @@ describe('chineseLevels', () => {
 
     expect(chineseLevels[2].title).toContain('人体')
     expect(chineseLevels[2].items.map((x) => x.hanzi)).toEqual(['口', '耳', '目', '手', '足'])
+  })
+
+  it('contains added levels 9 and 10 (sample)', () => {
+    expect(chineseLevels[8].title).toContain('更多数字')
+    expect(chineseLevels[8].items.map((x) => x.hanzi)).toEqual([
+      '四', '五', '六', '七', '八', '九', '十', '百', '千', '半', '多', '少'
+    ])
+
+    expect(chineseLevels[9].title).toContain('颜色')
+    expect(chineseLevels[9].items.map((x) => x.hanzi)).toEqual([
+      '红', '黄', '蓝', '绿', '白', '黑', '金', '紫', '粉', '灰', '彩', '色'
+    ])
   })
 
   it('every item has required fields', () => {

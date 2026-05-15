@@ -4,10 +4,13 @@ import { useEffect, useMemo, useState } from 'react'
 import { FillBlankQuiz } from '../../components/FillBlankQuiz'
 import { LiteracyCard } from '../../components/LiteracyCard'
 import { ProgressStars } from '../../components/ProgressStars'
-import { chineseLevels, mathLevels } from '../../data/lexicons'
+import { mathLevels } from '../../data/lexicons'
 import type { ChineseHanziItem, LexiconLevel, MathPhraseItem } from '../../data/lexicons/types'
 import { advanceProgress, awardStar, getProgressKey, getStarsKey } from '../../domain/progress'
-import { toBlankSentence } from '../../domain/quizSentence'
+import { speak, onPlayStateChange } from '../../utils/audio'
+import { buildQuizOptions } from '../../domain/quizData'
+import { addWrongWord } from '../../domain/wrongWords'
+import { getChineseLevelsWithCustom } from '../../data/customLexicon'
 
 const TOTAL_STARS = 5
 
@@ -18,25 +21,12 @@ type LevelData = {
   words: string[]
   sentence: string
   quizSentence: string
+  quizSourceSentence: string
   options: string[]
   correct: string
 }
 
-function pickOptions(all: string[], correct: string, count: number) {
-  const pool = all.filter((x) => x !== correct)
-  const chosen: string[] = []
-  for (let i = 0; i < pool.length && chosen.length < count - 1; i++) {
-    chosen.push(pool[i])
-  }
-  const result = [correct, ...chosen].slice(0, count)
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1))
-    const t = result[i]
-    result[i] = result[j]
-    result[j] = t
-  }
-  return result
-}
+type SpeakingTarget = 'char' | 'cardSentence' | 'cardWords' | 'quizSentence' | null
 
 function loadSavedPosition(category: string, fallbackLevel: number, fallbackItem: number) {
   try {
@@ -57,9 +47,10 @@ function buildLevelData(
   itemIndex: number
 ): { data: LevelData; level: LexiconLevel<ChineseHanziItem | MathPhraseItem> } {
   if (category === 'chinese') {
-    const level = chineseLevels[levelIndex] || chineseLevels[0]
+    const allChinese = getChineseLevelsWithCustom()
+    const level = allChinese[levelIndex] || allChinese[0]
     const item = level.items[itemIndex] || level.items[0]
-    const optionsAll = level.items.map((x) => (x as ChineseHanziItem).hanzi)
+    const quiz = buildQuizOptions('chinese', item)
     return {
       level,
       data: {
@@ -68,15 +59,16 @@ function buildLevelData(
         pinyin: item.pinyin,
         words: item.words,
         sentence: item.sentence,
-        quizSentence: toBlankSentence(item.sentence, item.hanzi),
-        options: pickOptions(optionsAll, item.hanzi, 3),
-        correct: item.hanzi
+        quizSentence: quiz.quizSentence,
+        quizSourceSentence: item.sentence,
+        options: quiz.options,
+        correct: quiz.correct
       }
     }
   }
   const level = mathLevels[levelIndex] || mathLevels[0]
   const item = level.items[itemIndex] || level.items[0]
-  const optionsAll = level.items.map((x) => (x as MathPhraseItem).phrase)
+  const quiz = buildQuizOptions('math', item)
   return {
     level,
     data: {
@@ -85,9 +77,10 @@ function buildLevelData(
       pinyin: '',
       words: item.words,
       sentence: item.hint,
-      quizSentence: toBlankSentence(item.example, item.phrase),
-      options: pickOptions(optionsAll, item.phrase, 3),
-      correct: item.phrase
+      quizSentence: quiz.quizSentence,
+      quizSourceSentence: item.example,
+      options: quiz.options,
+      correct: quiz.correct
     }
   }
 }
@@ -98,7 +91,7 @@ export default function Level() {
   const paramLevel = Number(router.params.level || 0)
   const paramItem = Number(router.params.item || 0)
 
-  const levels = category === 'chinese' ? chineseLevels : mathLevels
+  const levels = category === 'chinese' ? getChineseLevelsWithCustom() : mathLevels
 
   const [currentLevel, setCurrentLevel] = useState(() => {
     const saved = loadSavedPosition(category, paramLevel, paramItem)
@@ -111,11 +104,18 @@ export default function Level() {
   const [stars, setStars] = useState(0)
   const [quizPassed, setQuizPassed] = useState(false)
   const [allDone, setAllDone] = useState(false)
+  const [speaking, setSpeaking] = useState<SpeakingTarget>(null)
 
   const { data, level: currentLevelData } = useMemo(
     () => buildLevelData(category, currentLevel, currentItem),
     [category, currentLevel, currentItem]
   )
+
+  useEffect(() => {
+    return onPlayStateChange((playing) => {
+      if (!playing) setSpeaking(null)
+    })
+  }, [])
 
   const isLastItem =
     currentItem >= (currentLevelData?.items.length ?? 0) - 1
@@ -144,6 +144,11 @@ export default function Level() {
     setCurrentItem(next.itemIndex)
     saveProgress(next.levelIndex, next.itemIndex)
     setQuizPassed(false)
+  }
+
+  function handleSpeak(target: SpeakingTarget, text: string) {
+    setSpeaking(target)
+    speak(text)
   }
 
   useEffect(() => {
@@ -190,12 +195,15 @@ export default function Level() {
               pinyin={data.pinyin}
               words={data.words}
               sentence={data.sentence}
-              onSpeak={() => {
-                Taro.showToast({
-                  title: data.pinyin ? `发音：${data.pinyin}` : `关键词：${data.hanzi}`,
-                  icon: 'none'
-                })
-              }}
+              speaking={
+                speaking === 'char' ? 'char'
+                : speaking === 'cardSentence' ? 'sentence'
+                : speaking === 'cardWords' ? 'words'
+                : null
+              }
+              onSpeak={() => handleSpeak('char', data.hanzi)}
+              onSpeakSentence={() => handleSpeak('cardSentence', data.sentence)}
+              onSpeakWords={() => handleSpeak('cardWords', data.words.join('、'))}
             />
           </View>
 
@@ -204,6 +212,10 @@ export default function Level() {
               sentence={data.quizSentence}
               options={data.options}
               correct={data.correct}
+              onWrong={() => {
+                const item = currentLevelData.items[currentItem]
+                addWrongWord(category as 'chinese' | 'math', item)
+              }}
               onPass={() => {
                 const next = awardStar(stars, TOTAL_STARS)
                 setStars(next)
@@ -212,6 +224,8 @@ export default function Level() {
               }}
               onNext={quizPassed ? goNext : undefined}
               nextLabel={nextLabel()}
+              onSpeakSentence={() => handleSpeak('quizSentence', data.quizSourceSentence)}
+              isSpeaking={speaking === 'quizSentence'}
             />
           </View>
 

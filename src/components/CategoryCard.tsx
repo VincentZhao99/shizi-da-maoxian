@@ -5,12 +5,14 @@ export function CategoryCard({
   subtitle,
   color,
   progress,
+  emoji,
   onClick
 }: {
   title: string
   subtitle: string
   color: string
   progress?: string
+  emoji?: string
   onClick: () => void
 }) {
   return (
@@ -19,7 +21,10 @@ export function CategoryCard({
       style={{ backgroundColor: color }}
       onClick={onClick}
     >
-      <Text className="block text-2xl font-extrabold text-[#1E1E1E]">{title}</Text>
+      <View className="flex flex-row items-center gap-2">
+        {emoji ? <Text className="text-2xl">{emoji}</Text> : null}
+        <Text className="text-2xl font-extrabold text-[#1E1E1E]">{title}</Text>
+      </View>
       <Text className="mt-2 block text-base font-semibold text-[#1E1E1E] opacity-80">
         {subtitle}
       </Text>
