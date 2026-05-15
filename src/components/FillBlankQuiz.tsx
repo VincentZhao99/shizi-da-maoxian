@@ -1,6 +1,8 @@
 import { View, Text } from '@tarojs/components'
-import { useState } from 'react'
+import { useMemo, useRef, useState } from 'react'
 import { isCorrectOption } from '../domain/quiz'
+import { SpeakerIcon } from './SpeakerIcon'
+import { annotateSentence } from '../utils/pinyin'
 
 type Status = 'idle' | 'correct' | 'wrong'
 
@@ -10,7 +12,10 @@ export function FillBlankQuiz({
   correct,
   onPass,
   onNext,
-  nextLabel = '下一题'
+  nextLabel = '下一题',
+  onSpeakSentence,
+  isSpeaking = false,
+  onWrong
 }: {
   sentence: string
   options: string[]
@@ -18,14 +23,44 @@ export function FillBlankQuiz({
   onPass: () => void
   onNext?: () => void
   nextLabel?: string
+  onSpeakSentence?: () => void
+  isSpeaking?: boolean
+  onWrong?: () => void
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [passed, setPassed] = useState(false)
+  const wrongReported = useRef(false)
+  const chars = useMemo(() => annotateSentence(sentence), [sentence])
 
   return (
     <View className="w-full rounded-[28px] bg-white px-6 py-6 shadow-sm">
-      <Text className="block text-base font-extrabold text-[#1E1E1E]">选字填空</Text>
-      <Text className="mt-3 block text-xl font-extrabold text-[#2B2B2B]">{sentence}</Text>
+      <View className="flex flex-row items-center gap-2">
+        <Text className="text-base font-extrabold text-[#1E1E1E]">选字填空</Text>
+        {onSpeakSentence ? (
+          <SpeakerIcon isPlaying={isSpeaking} size="text-lg" onClick={onSpeakSentence} />
+        ) : null}
+      </View>
+
+      <View className="mt-3 flex flex-row flex-wrap gap-x-2">
+        {chars.map((item, i) => (
+          <View key={i} className="items-center">
+            <Text
+              className={`text-xl font-extrabold ${
+                isSpeaking ? 'text-[#3B82F6]' : item.char === '___' ? 'text-[#FF6B6B]' : 'text-[#2B2B2B]'
+              }`}
+            >
+              {item.char}
+            </Text>
+            {item.char !== '___' ? (
+              <Text className="block mt-0.5 leading-relaxed text-xs font-semibold text-[#9A9A9A]">
+                {item.pinyin}
+              </Text>
+            ) : (
+              <View className="block h-4" />
+            )}
+          </View>
+        ))}
+      </View>
 
       <View className="mt-5 flex flex-col gap-3">
         {options.map((opt) => (
@@ -38,6 +73,10 @@ export function FillBlankQuiz({
               if (ok && !passed) {
                 setPassed(true)
                 onPass()
+              }
+              if (!ok && !wrongReported.current) {
+                wrongReported.current = true
+                onWrong?.()
               }
             }}
           >
