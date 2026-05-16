@@ -104,15 +104,15 @@ export const mathLevels: Array<LexiconLevel<MathPhraseItem>> = [
       {
         phrase: '第几',
         words: ['第几个', '第几位'],
-        example: '从左数第3个是谁？',
-        hint: '“第几”先确定从哪边数，再按顺序数。',
+        example: '排队时你是第几个？',
+        hint: '“第几”先确定从哪边开始，再按顺序找。',
         tags: ['顺序', '方位']
       },
       {
         phrase: '从左数',
         words: ['从左往右', '左边'],
         example: '从左数第2个是哪个？',
-        hint: '先找“从左数/从右数”，再数位置。',
+        hint: '先找“从左/从右”，再看是第几个。',
         tags: ['顺序', '方位']
       },
       {
@@ -133,7 +133,7 @@ export const mathLevels: Array<LexiconLevel<MathPhraseItem>> = [
         phrase: '前',
         words: ['前面', '前后'],
         example: '队伍前面有几人？',
-        hint: '“前/后”与位置有关，先画队伍再数。',
+        hint: '“前/后”与位置有关，先画队伍再看顺序。',
         tags: ['方位']
       },
       {
@@ -160,28 +160,28 @@ export const mathLevels: Array<LexiconLevel<MathPhraseItem>> = [
         phrase: '本',
         words: ['几本书', '一本'],
         example: '桌上有几本书？',
-        hint: '“本”通常数书本。',
+        hint: '“本”搭配书本、画册等。',
         tags: ['量词']
       },
       {
         phrase: '只',
         words: ['几只鸟', '一只'],
         example: '树上有几只鸟？',
-        hint: '“只”常数动物。',
+        hint: '“只”搭配动物、小鸟等。',
         tags: ['量词']
       },
       {
         phrase: '支',
         words: ['几支笔', '一支'],
         example: '铅笔有几支？',
-        hint: '“支”常数笔、箭等细长物。',
+        hint: '“支”搭配笔、箭等细长物品。',
         tags: ['量词']
       },
       {
         phrase: '张',
         words: ['几张纸', '一张'],
         example: '有几张纸？',
-        hint: '“张”常数纸、桌子等平的物。',
+        hint: '“张”搭配纸、桌子等扁平的物品。',
         tags: ['量词']
       }
     ]
@@ -303,7 +303,7 @@ export const mathLevels: Array<LexiconLevel<MathPhraseItem>> = [
       {
         phrase: '中间',
         words: ['中间有几', '中间一个'],
-        example: '从前往后数，小明在中间第几个？',
+        example: '队伍中间的小朋友是谁？',
         hint: '"中间"=两端之间的位置。',
         tags: ['方位', '顺序']
       },
