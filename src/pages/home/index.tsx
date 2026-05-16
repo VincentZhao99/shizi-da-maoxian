@@ -1,14 +1,11 @@
 import Taro, { useDidShow } from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { CategoryCard } from '../../components/CategoryCard'
-import { ProgressStars } from '../../components/ProgressStars'
 import { mathLevels } from '../../data/lexicons'
-import { getProgressKey, getStarsKey } from '../../domain/progress'
+import { DAILY_GOAL, getProgressKey, getStarsKey, loadStreak, tryRecordStreak } from '../../domain/progress'
 import { loadWrongWords } from '../../domain/wrongWords'
 import { getChineseLevelsWithCustom } from '../../data/customLexicon'
-
-const TOTAL_STARS = 5
 
 const GREETINGS = [
   '开始今天的探险吧！',
@@ -42,19 +39,34 @@ function getWelcomeMessage(): string {
 }
 
 export default function Home() {
-  const [stars, setStars] = useState(0)
+  const [mathProgress, setMathProgress] = useState(0)
+  const [chineseProgress, setChineseProgress] = useState(0)
   const [mathPos, setMathPos] = useState(() => loadPosition('math'))
   const [chinesePos, setChinesePos] = useState(() => loadPosition('chinese'))
   const [wrongCount, setWrongCount] = useState(0)
+  const [streak, setStreak] = useState(() => loadStreak().count)
   const [welcome] = useState(() => getWelcomeMessage())
+  const streakRecorded = useRef(false)
 
   useDidShow(() => {
-    const v = Number(Taro.getStorageSync(getStarsKey()) || 0)
-    setStars(Number.isFinite(v) ? v : 0)
+    const m = Number(Taro.getStorageSync(getStarsKey('math')) || 0)
+    setMathProgress(Number.isFinite(m) ? Math.min(m, DAILY_GOAL) : 0)
+    const c = Number(Taro.getStorageSync(getStarsKey('chinese')) || 0)
+    setChineseProgress(Number.isFinite(c) ? Math.min(c, DAILY_GOAL) : 0)
     setMathPos(loadPosition('math'))
     setChinesePos(loadPosition('chinese'))
     setWrongCount(loadWrongWords().length)
   })
+
+  const bothDone = mathProgress >= DAILY_GOAL && chineseProgress >= DAILY_GOAL
+
+  useEffect(() => {
+    if (bothDone && !streakRecorded.current) {
+      streakRecorded.current = true
+      const count = tryRecordStreak()
+      setStreak(count)
+    }
+  }, [bothDone])
 
   return (
     <View className="min-h-screen bg-[#FFF3D6] px-6 py-8">
@@ -68,20 +80,26 @@ export default function Home() {
         </Text>
       </View>
 
-      <View className="mt-4 items-center">
-        <ProgressStars total={TOTAL_STARS} value={stars} />
-        <Text className="mt-2 block text-sm font-bold text-[#5A5A5A]">
-          今日进度：{stars}/{TOTAL_STARS}
-        </Text>
-      </View>
+      {bothDone ? (
+        <View className="mt-4 rounded-2xl bg-[#FFD700] px-5 py-4 text-center">
+          <Text className="text-2xl font-extrabold text-[#1E1E1E]">
+            太棒了，今日探险全部完成！
+          </Text>
+          {streak > 0 ? (
+            <Text className="mt-1 block text-base font-bold text-[#5A5A5A]">
+              已连续打卡 {streak} 天
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
-      <View className="mt-7 flex flex-col gap-4">
+      <View className="mt-5 flex flex-col gap-4">
         <CategoryCard
           title="数学探险"
           subtitle="功能字闯关"
           color="#5CC8FF"
           emoji="🧮"
-          progress={`第 ${mathPos.level + 1}/${mathLevels.length} 关`}
+          progress={`今日数学：${mathProgress}/${DAILY_GOAL} 关 · 第 ${mathPos.level + 1}/${mathLevels.length} 关`}
           onClick={() =>
             Taro.navigateTo({
               url: `/pages/level/index?category=math&level=${mathPos.level}&item=${mathPos.item}`
@@ -93,7 +111,7 @@ export default function Home() {
           subtitle="生字闯关"
           color="#B79CFF"
           emoji="📖"
-          progress={`第 ${chinesePos.level + 1}/${getChineseLevelsWithCustom().length} 关`}
+          progress={`今日语文：${chineseProgress}/${DAILY_GOAL} 关 · 第 ${chinesePos.level + 1}/${getChineseLevelsWithCustom().length} 关`}
           onClick={() =>
             Taro.navigateTo({
               url: `/pages/level/index?category=chinese&level=${chinesePos.level}&item=${chinesePos.item}`
@@ -107,7 +125,7 @@ export default function Home() {
           <View
             className="w-full rounded-3xl px-6 py-5 active:opacity-80"
             style={{ backgroundColor: '#FF6B6B' }}
-            onClick={() => Taro.navigateTo({ url: '/pages/wrongWords/index' })}
+            onClick={() => Taro.switchTab({ url: '/pages/wrongWords/index' })}
           >
             <View className="flex flex-row items-center gap-2">
               <Text className="text-2xl">👾</Text>

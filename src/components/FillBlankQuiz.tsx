@@ -1,5 +1,5 @@
 import { View, Text } from '@tarojs/components'
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { isCorrectOption } from '../domain/quiz'
 import { SpeakerIcon } from './SpeakerIcon'
 import { annotateSentence } from '../utils/pinyin'
@@ -15,7 +15,8 @@ export function FillBlankQuiz({
   nextLabel = '下一题',
   onSpeakSentence,
   isSpeaking = false,
-  onWrong
+  onWrong,
+  blankPinyin
 }: {
   sentence: string
   options: string[]
@@ -26,11 +27,25 @@ export function FillBlankQuiz({
   onSpeakSentence?: () => void
   isSpeaking?: boolean
   onWrong?: () => void
+  blankPinyin?: string
 }) {
   const [status, setStatus] = useState<Status>('idle')
   const [passed, setPassed] = useState(false)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const wrongReported = useRef(false)
   const chars = useMemo(() => annotateSentence(sentence), [sentence])
+
+  useEffect(() => {
+    if (status === 'correct' && onNext) {
+      timerRef.current = setTimeout(() => onNext(), 1200)
+    }
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current)
+        timerRef.current = null
+      }
+    }
+  }, [status, onNext])
 
   return (
     <View className="w-full rounded-[28px] bg-white px-6 py-6 shadow-sm">
@@ -54,6 +69,10 @@ export function FillBlankQuiz({
             {item.char !== '___' ? (
               <Text className="block mt-0.5 leading-relaxed text-xs font-semibold text-[#9A9A9A]">
                 {item.pinyin}
+              </Text>
+            ) : blankPinyin ? (
+              <Text className="block mt-0.5 leading-relaxed text-xs font-semibold text-[#FF6B6B]">
+                {blankPinyin}
               </Text>
             ) : (
               <View className="block h-4" />
