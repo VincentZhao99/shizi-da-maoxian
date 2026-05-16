@@ -223,6 +223,7 @@ export default function Level() {
               onSpeak={() => handleSpeak('char', data.hanzi)}
               onSpeakSentence={() => handleSpeak('cardSentence', data.sentence)}
               onSpeakWords={() => handleSpeak('cardWords', data.words.join('、'))}
+              category={category}
             />
           </View>
 
