@@ -2,7 +2,7 @@ import Taro, { useDidShow } from '@tarojs/taro'
 import { View, Text, Input } from '@tarojs/components'
 import { useMemo, useState } from 'react'
 import { addCustomItem, loadCustomItems, removeCustomItem } from '../../data/customLexicon'
-import { getPinyin } from '../../utils/pinyin'
+import { getPinyin, getPinyinInContext } from '../../utils/pinyin'
 
 export default function Parent() {
   const [hanzi, setHanzi] = useState('')
@@ -15,8 +15,11 @@ export default function Parent() {
 
   const autoPinyin = useMemo(() => {
     if (!hanzi.trim()) return ''
+    if (sentence.trim() && sentence.includes(hanzi.trim())) {
+      return getPinyinInContext(sentence.trim(), hanzi.trim())
+    }
     return getPinyin(hanzi.trim())
-  }, [hanzi])
+  }, [hanzi, sentence])
 
   const previewWords = useMemo(() => {
     if (!hanzi.trim()) return ''

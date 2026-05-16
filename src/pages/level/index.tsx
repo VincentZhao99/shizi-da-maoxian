@@ -6,13 +6,14 @@ import { LiteracyCard } from '../../components/LiteracyCard'
 import { ProgressStars } from '../../components/ProgressStars'
 import { mathLevels } from '../../data/lexicons'
 import type { ChineseHanziItem, LexiconLevel, MathPhraseItem } from '../../data/lexicons/types'
-import { advanceProgress, awardStar, getProgressKey, getStarsKey } from '../../domain/progress'
+import { advanceProgress, awardStar, DAILY_GOAL, getProgressKey, getStarsKey, incrementTotalStars } from '../../domain/progress'
 import { speak, onPlayStateChange } from '../../utils/audio'
+import { getPinyinInContext } from '../../utils/pinyin'
 import { buildQuizOptions } from '../../domain/quizData'
 import { addWrongWord } from '../../domain/wrongWords'
 import { getChineseLevelsWithCustom } from '../../data/customLexicon'
 
-const TOTAL_STARS = 5
+const TOTAL_STARS = DAILY_GOAL
 
 type LevelData = {
   title: string
@@ -156,7 +157,7 @@ export default function Level() {
   }, [currentLevel])
 
   useDidShow(() => {
-    const v = Number(Taro.getStorageSync(getStarsKey()) || 0)
+    const v = Number(Taro.getStorageSync(getStarsKey(category)) || 0)
     setStars(Number.isFinite(v) ? v : 0)
   })
 
@@ -219,13 +220,15 @@ export default function Level() {
               onPass={() => {
                 const next = awardStar(stars, TOTAL_STARS)
                 setStars(next)
-                Taro.setStorageSync(getStarsKey(), next)
+                Taro.setStorageSync(getStarsKey(category), next)
+                incrementTotalStars()
                 setQuizPassed(true)
               }}
               onNext={quizPassed ? goNext : undefined}
               nextLabel={nextLabel()}
               onSpeakSentence={() => handleSpeak('quizSentence', data.quizSourceSentence)}
               isSpeaking={speaking === 'quizSentence'}
+              blankPinyin={getPinyinInContext(data.quizSourceSentence, data.correct)}
             />
           </View>
 
