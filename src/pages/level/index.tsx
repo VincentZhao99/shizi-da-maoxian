@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState } from 'react'
 import { FillBlankQuiz } from '../../components/FillBlankQuiz'
 import { LiteracyCard } from '../../components/LiteracyCard'
 import { ProgressStars } from '../../components/ProgressStars'
+import { TreasureMap } from '../../components/TreasureMap'
+import { TreasureChest } from '../../components/TreasureChest'
 import { mathLevels } from '../../data/lexicons'
 import type { ChineseHanziItem, LexiconLevel, MathPhraseItem } from '../../data/lexicons/types'
 import { advanceProgress, awardStar, DAILY_GOAL, getProgressKey, getStarsKey, incrementTotalStars } from '../../domain/progress'
@@ -104,6 +106,7 @@ export default function Level() {
   })
   const [stars, setStars] = useState(0)
   const [quizPassed, setQuizPassed] = useState(false)
+  const [showChest, setShowChest] = useState(false)
   const [allDone, setAllDone] = useState(false)
   const [speaking, setSpeaking] = useState<SpeakingTarget>(null)
 
@@ -117,6 +120,15 @@ export default function Level() {
       if (!playing) setSpeaking(null)
     })
   }, [])
+
+  const itemLabels = useMemo(() => {
+    return (currentLevelData?.items ?? []).map((item: any) => {
+      if (category === 'chinese') return (item as ChineseHanziItem).hanzi
+      return (item as MathPhraseItem).phrase
+    })
+  }, [currentLevelData, category])
+
+  const chestStars = currentLevelData?.items.length ?? 0
 
   const isLastItem =
     currentItem >= (currentLevelData?.items.length ?? 0) - 1
@@ -171,7 +183,13 @@ export default function Level() {
     <View className="min-h-screen bg-[#E9F8FF] px-6 py-7">
       <Text className="block text-center text-2xl font-extrabold text-[#1E1E1E]">{data.title}</Text>
 
-      <View className="mt-4 items-center">
+      <TreasureMap
+        totalNodes={currentLevelData?.items.length ?? 0}
+        currentNode={currentItem}
+        nodeLabels={itemLabels}
+      />
+
+      <View className="mt-2 items-center">
         <ProgressStars total={TOTAL_STARS} value={stars} />
       </View>
 
@@ -224,8 +242,14 @@ export default function Level() {
                 incrementTotalStars()
                 setQuizPassed(true)
               }}
-              onNext={quizPassed ? goNext : undefined}
-              nextLabel={nextLabel()}
+              onNext={
+                quizPassed
+                  ? isLastItem
+                    ? () => setShowChest(true)
+                    : goNext
+                  : undefined
+              }
+              nextLabel={isLastItem ? '开启宝箱' : nextLabel()}
               onSpeakSentence={() => handleSpeak('quizSentence', data.quizSourceSentence)}
               isSpeaking={speaking === 'quizSentence'}
               blankPinyin={getPinyinInContext(data.quizSourceSentence, data.correct)}
@@ -244,6 +268,16 @@ export default function Level() {
           )}
         </>
       )}
+
+      <TreasureChest
+        visible={showChest}
+        starsEarned={chestStars}
+        isLastLevel={isLastLevel}
+        onNext={() => {
+          setShowChest(false)
+          goNext()
+        }}
+      />
     </View>
   )
 }
