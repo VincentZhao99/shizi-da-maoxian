@@ -96,7 +96,7 @@ export default function WrongWords() {
   }
 
   return (
-    <View className="min-h-screen bg-[#E9F8FF] px-6 py-7">
+    <View className="min-h-screen bg-[#E9F8FF] px-6 py-7" style={{ paddingBottom: '100px' }}>
       <Text className="block text-center text-2xl font-extrabold text-[#1E1E1E]">
         错题本
       </Text>
@@ -155,7 +155,7 @@ export default function WrongWords() {
             />
           </View>
 
-          <View className="mt-5" key={`quiz-${currentIndex}`}>
+          <View className="mt-5" key={`quiz-${currentIndex}-${quiz.correct}`}>
             <FillBlankQuiz
               sentence={quiz.quizSentence}
               options={quiz.options}

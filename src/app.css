@@ -10,3 +10,14 @@
 .animate-speaker {
   animation: speaker-pulse 0.6s ease-in-out infinite;
 }
+
+@keyframes confettiFall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(80px) rotate(540deg);
+    opacity: 0;
+  }
+}

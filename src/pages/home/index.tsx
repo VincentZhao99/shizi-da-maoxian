@@ -1,18 +1,11 @@
 import Taro, { useDidShow } from '@tarojs/taro'
 import { View, Text } from '@tarojs/components'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { CategoryCard } from '../../components/CategoryCard'
 import { mathLevels } from '../../data/lexicons'
-import { DAILY_GOAL, getProgressKey, getStarsKey, loadStreak, tryRecordStreak } from '../../domain/progress'
+import { DAILY_GOAL, getProgressKey, getStarsKey, getTotalStars, loadStreak, tryRecordStreak } from '../../domain/progress'
 import { loadWrongWords } from '../../domain/wrongWords'
 import { getChineseLevelsWithCustom } from '../../data/customLexicon'
-
-const GREETINGS = [
-  '开始今天的探险吧！',
-  '今天要收集好多星星哦！',
-  '快来和汉字交朋友吧！',
-  '冲冲冲，去闯关啦！',
-]
 
 function loadPosition(category: string) {
   try {
@@ -27,7 +20,48 @@ function loadPosition(category: string) {
   return { level: 0, item: 0 }
 }
 
-function getWelcomeMessage(): string {
+const CONFETTI_COLORS = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#FF8E53', '#C084FC']
+
+function Confetti() {
+  const particles = useMemo(() => {
+    return Array.from({ length: 30 }, (_, i) => ({
+      id: i,
+      left: Math.random() * 100,
+      color: CONFETTI_COLORS[i % CONFETTI_COLORS.length],
+      delay: Math.random() * 0.8,
+      size: 5 + Math.random() * 6,
+      duration: 1.5 + Math.random() * 1.5
+    }))
+  }, [])
+
+  return (
+    <View className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 10 }}>
+      {particles.map((p) => (
+        <View
+          key={p.id}
+          className="absolute rounded-full"
+          style={{
+            left: `${p.left}%`,
+            top: '-12px',
+            width: `${p.size}px`,
+            height: `${p.size}px`,
+            backgroundColor: p.color,
+            animation: `confettiFall ${p.duration}s ${p.delay}s ease-in forwards`
+          }}
+        />
+      ))}
+    </View>
+  )
+}
+
+const GREETINGS = [
+  '开始今天的探险吧！',
+  '今天要收集好多星星哦！',
+  '快来和汉字交朋友吧！',
+  '冲冲冲，去闯关啦！',
+]
+
+function getGreeting(): string {
   try {
     const name = Taro.getStorageSync('childName')
     if (name && typeof name === 'string' && name.trim()) {
@@ -45,7 +79,8 @@ export default function Home() {
   const [chinesePos, setChinesePos] = useState(() => loadPosition('chinese'))
   const [wrongCount, setWrongCount] = useState(0)
   const [streak, setStreak] = useState(() => loadStreak().count)
-  const [welcome] = useState(() => getWelcomeMessage())
+  const [totalStars, setTotalStars] = useState(() => getTotalStars())
+  const [greeting] = useState(() => getGreeting())
   const streakRecorded = useRef(false)
 
   useDidShow(() => {
@@ -56,6 +91,8 @@ export default function Home() {
     setMathPos(loadPosition('math'))
     setChinesePos(loadPosition('chinese'))
     setWrongCount(loadWrongWords().length)
+    setTotalStars(getTotalStars())
+    setStreak(loadStreak().count)
   })
 
   const bothDone = mathProgress >= DAILY_GOAL && chineseProgress >= DAILY_GOAL
@@ -68,38 +105,73 @@ export default function Home() {
     }
   }, [bothDone])
 
+  function handleStart() {
+    if (mathProgress < DAILY_GOAL) {
+      Taro.navigateTo({
+        url: `/pages/level/index?category=math&level=${mathPos.level}&item=${mathPos.item}`
+      })
+    } else {
+      Taro.navigateTo({
+        url: `/pages/level/index?category=chinese&level=${chinesePos.level}&item=${chinesePos.item}`
+      })
+    }
+  }
+
+  const chineseLevels = useMemo(() => getChineseLevelsWithCustom(), [])
+
   return (
-    <View className="min-h-screen bg-[#FFF3D6] px-6 py-8">
+    <View className="min-h-screen bg-[#FFF3D6] px-5 py-6 relative" style={{ paddingBottom: '100px' }}>
+      {/* Header — stats only (nav bar already shows "识字大冒险") */}
       <View
-        className="flex flex-row items-center justify-center"
+        className="flex flex-row items-center justify-center gap-6"
         onLongPress={() => Taro.navigateTo({ url: '/pages/parent/index' })}
       >
-        <Text className="text-[36px] mr-2">🚂</Text>
-        <Text className="text-[28px] font-extrabold text-[#1E1E1E]">
-          {welcome}
-        </Text>
+        <View className="flex flex-row items-center gap-1">
+          <Text className="text-xl text-[#FFB300]">★</Text>
+          <Text className="text-lg font-extrabold text-[#FF8C00]">{totalStars}</Text>
+        </View>
+        <View className="flex flex-row items-center gap-1">
+          <Text className="text-lg">🔥</Text>
+          <Text className="text-lg font-extrabold text-[#FF6B6B]">连签 {streak} 天</Text>
+        </View>
       </View>
 
-      {bothDone ? (
-        <View className="mt-4 rounded-2xl bg-[#FFD700] px-5 py-4 text-center">
-          <Text className="text-2xl font-extrabold text-[#1E1E1E]">
-            太棒了，今日探险全部完成！
-          </Text>
-          {streak > 0 ? (
-            <Text className="mt-1 block text-base font-bold text-[#5A5A5A]">
-              已连续打卡 {streak} 天
+      {/* Main Action Area */}
+      <View className="mt-6 flex flex-col items-center">
+        {bothDone ? (
+          <View className="relative w-full rounded-2xl bg-[#FFD700] px-5 py-5 text-center overflow-hidden">
+            <Confetti />
+            <Text className="text-2xl font-extrabold text-[#1E1E1E] relative" style={{ zIndex: 11 }}>
+              🎉 今日探险全部完成！ 🎉
             </Text>
-          ) : null}
-        </View>
-      ) : null}
+          </View>
+        ) : (
+          <View
+            className="rounded-full active:opacity-85 flex items-center justify-center"
+            style={{
+              width: '80%',
+              background: 'linear-gradient(135deg, #FF8E53, #FF6B6B, #C084FC)',
+              paddingTop: '16px',
+              paddingBottom: '16px'
+            }}
+            onClick={handleStart}
+          >
+            <Text className="text-xl font-extrabold text-white">🐾 {greeting}</Text>
+          </View>
+        )}
+      </View>
 
+      {/* Category Cards */}
       <View className="mt-5 flex flex-col gap-4">
         <CategoryCard
           title="数学探险"
           subtitle="功能字闯关"
           color="#5CC8FF"
-          emoji="🧮"
-          progress={`今日数学：${mathProgress}/${DAILY_GOAL} 关 · 第 ${mathPos.level + 1}/${mathLevels.length} 关`}
+          emoji="🔢"
+          starCount={mathProgress}
+          dailyGoal={DAILY_GOAL}
+          currentLevel={mathPos.level + 1}
+          totalLevels={mathLevels.length}
           onClick={() =>
             Taro.navigateTo({
               url: `/pages/level/index?category=math&level=${mathPos.level}&item=${mathPos.item}`
@@ -111,7 +183,10 @@ export default function Home() {
           subtitle="生字闯关"
           color="#B79CFF"
           emoji="📖"
-          progress={`今日语文：${chineseProgress}/${DAILY_GOAL} 关 · 第 ${chinesePos.level + 1}/${getChineseLevelsWithCustom().length} 关`}
+          starCount={chineseProgress}
+          dailyGoal={DAILY_GOAL}
+          currentLevel={chinesePos.level + 1}
+          totalLevels={chineseLevels.length}
           onClick={() =>
             Taro.navigateTo({
               url: `/pages/level/index?category=chinese&level=${chinesePos.level}&item=${chinesePos.item}`
@@ -120,30 +195,25 @@ export default function Home() {
         />
       </View>
 
+      {/* Wrong Words Banner */}
       {wrongCount > 0 ? (
-        <View className="mt-5">
+        <View className="mt-4">
           <View
-            className="w-full rounded-3xl px-6 py-5 active:opacity-80"
+            className="w-full rounded-2xl px-5 py-4 active:opacity-80"
             style={{ backgroundColor: '#FF6B6B' }}
             onClick={() => Taro.switchTab({ url: '/pages/wrongWords/index' })}
           >
             <View className="flex flex-row items-center gap-2">
-              <Text className="text-2xl">👾</Text>
-              <Text className="text-2xl font-extrabold text-white">消灭错字怪</Text>
+              <Text className="text-xl">👾</Text>
+              <Text className="text-xl font-extrabold text-white">消灭错字怪</Text>
             </View>
-            <Text className="mt-2 block text-base font-semibold text-white opacity-90">
+            <Text className="mt-1 block text-sm font-semibold text-white opacity-90">
               还有 {wrongCount} 个错字怪等你消灭
             </Text>
           </View>
         </View>
       ) : null}
 
-      <View className="mt-8 rounded-3xl bg-white px-6 py-5">
-        <Text className="block text-base font-extrabold text-[#1E1E1E]">玩法</Text>
-        <Text className="mt-2 block text-sm font-semibold text-[#5A5A5A]">
-          先看识字卡片，再做一个小填空，答对就点亮一颗星星。
-        </Text>
-      </View>
     </View>
   )
 }

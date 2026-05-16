@@ -19,7 +19,7 @@ export default function Profile() {
   })
 
   return (
-    <View className="min-h-screen bg-[#F5F5F5] px-6 py-7">
+    <View className="min-h-screen bg-[#F5F5F5] px-6 py-7" style={{ paddingBottom: '100px' }}>
       <Text className="block text-center text-2xl font-extrabold text-[#1E1E1E]">我的</Text>
 
       <View className="mt-6 flex flex-col gap-4">
