@@ -41,11 +41,11 @@ export function LiteracyCard({
     <View className="w-full rounded-[28px] bg-white px-6 py-6 shadow-sm">
       {isFront ? (
         isChinese ? (
-          <View style={{ display: 'flex', flexDirection: 'row', gap: '16px' }}>
+          <View style={{ display: 'flex', flexDirection: 'row', gap: '16px', alignItems: 'center' }}>
             <View style={{ flexShrink: 0 }}>
               <StrokeAnimation hanzi={hanzi} canvasSize={180} />
             </View>
-            <View style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '10px', minWidth: 0 }}>
+            <View style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '14px', minWidth: 0 }}>
               <View
                 style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}
                 onClick={onSpeak}
@@ -53,13 +53,15 @@ export function LiteracyCard({
                 <Text style={{ fontSize: '22px', fontWeight: 'bold', color: '#1E1E1E' }}>{hanziPinyin}</Text>
                 <SpeakerIcon isPlaying={speaking === 'char'} size="text-xl" onClick={onSpeak} />
               </View>
-              <Text style={{ fontSize: '14px', fontWeight: '600', color: '#5A5A5A' }}>笔画：{strokeCount}画</Text>
-              {radicalInfo ? (
-                <>
-                  <Text style={{ fontSize: '14px', fontWeight: '600', color: '#5A5A5A' }}>偏旁：{radicalInfo.radical}</Text>
-                  <Text style={{ fontSize: '14px', fontWeight: '600', color: '#5A5A5A' }}>结构：{radicalInfo.struct}</Text>
-                </>
-              ) : null}
+              <View style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <Text style={{ fontSize: '14px', fontWeight: '600', color: '#5A5A5A' }}>笔画：{strokeCount}画</Text>
+                {radicalInfo ? (
+                  <>
+                    <Text style={{ fontSize: '14px', fontWeight: '600', color: '#5A5A5A' }}>偏旁：{radicalInfo.radical}</Text>
+                    <Text style={{ fontSize: '14px', fontWeight: '600', color: '#5A5A5A' }}>结构：{radicalInfo.struct}</Text>
+                  </>
+                ) : null}
+              </View>
             </View>
           </View>
         ) : (

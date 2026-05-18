@@ -148,7 +148,7 @@ export default function Home() {
             className="rounded-full active:opacity-85 flex items-center justify-center"
             style={{
               width: '80%',
-              background: 'linear-gradient(135deg, #FF8E53, #FF6B6B, #C084FC)',
+              background: 'linear-gradient(135deg, #FFD93D, #FFB347, #FF8E53)',
               paddingTop: '16px',
               paddingBottom: '16px'
             }}

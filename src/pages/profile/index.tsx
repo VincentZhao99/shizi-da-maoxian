@@ -52,7 +52,7 @@ export default function Profile() {
                 <Text className="text-lg font-extrabold text-[#B79CFF]">语文 {todayChinese}/{DAILY_GOAL}</Text>
               </View>
             </View>
-            <Text className="text-5xl">📊</Text>
+            <Text className="text-5xl">🏆</Text>
           </View>
         </View>
       </View>
