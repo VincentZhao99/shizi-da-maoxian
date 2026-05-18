@@ -6,7 +6,6 @@ import { mathLevels } from '../../data/lexicons'
 import { DAILY_GOAL, getProgressKey, getStarsKey, getTotalStars, loadStreak, tryRecordStreak } from '../../domain/progress'
 import { loadWrongWords } from '../../domain/wrongWords'
 import { getChineseLevelsWithCustom } from '../../data/customLexicon'
-
 function loadPosition(category: string) {
   try {
     const raw = Taro.getStorageSync(getProgressKey(category))
@@ -118,7 +117,6 @@ export default function Home() {
   }
 
   const chineseLevels = useMemo(() => getChineseLevelsWithCustom(), [])
-
   return (
     <View className="min-h-screen bg-[#FFF3D6] px-5 py-6 relative" style={{ paddingBottom: '100px' }}>
       {/* Header — stats only (nav bar already shows "识字大冒险") */}
