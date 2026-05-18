@@ -13,13 +13,19 @@ export default function CustomTabBar() {
   return (
     <View
       style={{
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
         display: 'flex',
         flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'space-around',
         backgroundColor: '#FFFFFF',
+        borderTop: '1px solid #F0F0F0',
         paddingTop: '8px',
-        paddingBottom: 'calc(8px + env(safe-area-inset-bottom))'
+        paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
+        zIndex: 100
       }}
     >
       {TABS.map((tab) => {

@@ -1,4 +1,15 @@
-import { pinyin } from 'pinyin-pro'
+import { pinyin, customPinyin } from 'pinyin-pro'
+
+// 纠正 pinyin-pro 对多音字的误判。关键词最长匹配优先。
+customPinyin({
+  // 数 shǔ (动词) — pinyin-pro 默认返回 shù
+  我数: 'wǒ shǔ',
+  左数: 'zuǒ shǔ',
+  再数: 'zài shǔ',
+  数到: 'shǔ dào',
+  数数: 'shǔ shù',
+  数一数: 'shǔ yī shǔ',
+})
 
 export function getPinyin(text: string): string {
   return pinyin(text, { toneType: 'symbol' })
