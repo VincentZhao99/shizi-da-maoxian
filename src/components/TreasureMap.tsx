@@ -3,19 +3,19 @@ import { View, Text } from '@tarojs/components'
 export function TreasureMap({
   totalNodes,
   currentNode,
-  nodeLabels
+  nodeLabels,
+  trainIcon = '🚂'
 }: {
   totalNodes: number
   currentNode: number
   nodeLabels: string[]
+  trainIcon?: string
 }) {
   const safeCurrent = Math.min(currentNode, totalNodes - 1)
 
   return (
     <View style={{ paddingTop: '8px', paddingBottom: '8px' }}>
-      {/* Route line container */}
       <View style={{ position: 'relative', paddingLeft: '24px', paddingRight: '24px' }}>
-        {/* Background line */}
         <View
           style={{
             position: 'absolute',
@@ -28,7 +28,6 @@ export function TreasureMap({
           }}
         />
 
-        {/* Golden trail (completed segment) */}
         {safeCurrent > 0 ? (
           <View
             style={{
@@ -44,7 +43,6 @@ export function TreasureMap({
           />
         ) : null}
 
-        {/* Nodes */}
         <View
           style={{
             display: 'flex',
@@ -66,14 +64,12 @@ export function TreasureMap({
                   width: '40px'
                 }}
               >
-                {/* Train emoji above current node */}
                 {current ? (
-                  <Text style={{ fontSize: '24px', marginBottom: '2px' }}>🚂</Text>
+                  <Text style={{ fontSize: '24px', marginBottom: '2px' }}>{trainIcon}</Text>
                 ) : (
                   <View style={{ height: '30px' }} />
                 )}
 
-                {/* Node circle */}
                 <View
                   style={{
                     width: '32px',
@@ -97,7 +93,6 @@ export function TreasureMap({
                   </Text>
                 </View>
 
-                {/* Node label */}
                 <Text
                   style={{
                     marginTop: '6px',

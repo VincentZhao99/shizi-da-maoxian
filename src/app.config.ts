@@ -4,7 +4,9 @@ export default defineAppConfig({
     'pages/level/index',
     'pages/wrongWords/index',
     'pages/profile/index',
-    'pages/parent/index'
+    'pages/parent/index',
+    'pages/shop/index',
+    'pages/wardrobe/index'
   ],
   tabBar: {
     custom: true,

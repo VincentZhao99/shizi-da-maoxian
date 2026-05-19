@@ -25,20 +25,16 @@ export default function Profile() {
       <View className="mt-6 flex flex-col gap-4">
         <View className="rounded-2xl bg-white px-6 py-5">
           <View className="flex flex-row items-center justify-between">
-            <View>
-              <Text className="text-sm font-bold text-[#9A9A9A]">累计星星</Text>
-              <Text className="mt-1 text-4xl font-extrabold text-[#FFB300]">{totalStars}</Text>
-            </View>
+            <Text className="text-sm font-bold text-[#9A9A9A]">累计星星</Text>
+            <Text className="text-4xl font-extrabold text-[#FFB300]">{totalStars}</Text>
             <Text className="text-5xl">⭐</Text>
           </View>
         </View>
 
         <View className="rounded-2xl bg-white px-6 py-5">
           <View className="flex flex-row items-center justify-between">
-            <View>
-              <Text className="text-sm font-bold text-[#9A9A9A]">连续打卡</Text>
-              <Text className="mt-1 text-4xl font-extrabold text-[#1E1E1E]">{streak} 天</Text>
-            </View>
+            <Text className="text-sm font-bold text-[#9A9A9A]">连续打卡</Text>
+            <Text className="text-4xl font-extrabold text-[#1E1E1E]">{streak} 天</Text>
             <Text className="text-5xl">🔥</Text>
           </View>
         </View>
@@ -53,6 +49,42 @@ export default function Profile() {
               </View>
             </View>
             <Text className="text-5xl">🏆</Text>
+          </View>
+        </View>
+
+        <View
+          className="rounded-2xl bg-white px-6 py-5 active:opacity-85"
+          onClick={() => Taro.navigateTo({ url: '/pages/shop/index' })}
+        >
+          <View className="flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-3">
+              <Text className="text-4xl">✨</Text>
+              <View>
+                <Text className="text-base font-extrabold text-[#1E1E1E]">星星商城</Text>
+                <Text className="mt-0.5 block text-xs font-semibold text-[#9A9A9A]">
+                  用星星兑换酷炫皮肤
+                </Text>
+              </View>
+            </View>
+            <Text className="text-lg font-bold text-[#9A9A9A]">›</Text>
+          </View>
+        </View>
+
+        <View
+          className="rounded-2xl bg-white px-6 py-5 active:opacity-85"
+          onClick={() => Taro.navigateTo({ url: '/pages/wardrobe/index' })}
+        >
+          <View className="flex flex-row items-center justify-between">
+            <View className="flex flex-row items-center gap-3">
+              <Text className="text-4xl">🎨</Text>
+              <View>
+                <Text className="text-base font-extrabold text-[#1E1E1E]">我的装扮</Text>
+                <Text className="mt-0.5 block text-xs font-semibold text-[#9A9A9A]">
+                  管理已拥有的皮肤装扮
+                </Text>
+              </View>
+            </View>
+            <Text className="text-lg font-bold text-[#9A9A9A]">›</Text>
           </View>
         </View>
       </View>
