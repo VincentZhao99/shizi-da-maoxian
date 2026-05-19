@@ -119,7 +119,6 @@ export default function Home() {
   const chineseLevels = useMemo(() => getChineseLevelsWithCustom(), [])
   return (
     <View className="min-h-screen bg-[#FFF3D6] px-5 py-6 relative" style={{ paddingBottom: '100px' }}>
-      {/* Header — stats only (nav bar already shows "识字大冒险") */}
       <View
         className="flex flex-row items-center justify-center gap-6"
         onLongPress={() => Taro.navigateTo({ url: '/pages/parent/index' })}
@@ -134,7 +133,6 @@ export default function Home() {
         </View>
       </View>
 
-      {/* Main Action Area */}
       <View className="mt-6 flex flex-col items-center">
         {bothDone ? (
           <View className="relative w-full rounded-2xl bg-[#FFD700] px-5 py-5 text-center overflow-hidden">
@@ -159,7 +157,6 @@ export default function Home() {
         )}
       </View>
 
-      {/* Category Cards */}
       <View className="mt-5 flex flex-col gap-4">
         <CategoryCard
           title="数学探险"
@@ -193,7 +190,6 @@ export default function Home() {
         />
       </View>
 
-      {/* Wrong Words Banner */}
       {wrongCount > 0 ? (
         <View className="mt-4">
           <View
@@ -211,6 +207,24 @@ export default function Home() {
           </View>
         </View>
       ) : null}
+
+      <View className="mt-4">
+        <View
+          className="w-full rounded-2xl px-5 py-4 active:opacity-80"
+          style={{
+            background: 'linear-gradient(135deg, #FFD93D, #FFB347)'
+          }}
+          onClick={() => Taro.navigateTo({ url: '/pages/shop/index' })}
+        >
+          <View className="flex flex-row items-center gap-2">
+            <Text className="text-xl">✨</Text>
+            <Text className="text-xl font-extrabold text-[#1E1E1E]">星星商城</Text>
+          </View>
+          <Text className="mt-1 block text-sm font-semibold text-[#5A5A5A]">
+            用星星兑换酷炫皮肤，小火车大变身！
+          </Text>
+        </View>
+      </View>
 
     </View>
   )

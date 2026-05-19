@@ -1,4 +1,32 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+vi.mock('@tarojs/taro', () => {
+  const store: Record<string, any> = {}
+  return {
+    default: {
+      getStorageSync(key: string) {
+        return store[key] ?? null
+      },
+      setStorageSync(key: string, value: any) {
+        store[key] = value
+      },
+      removeStorageSync(key: string) {
+        delete store[key]
+      },
+      showToast() {},
+      navigateTo() {},
+      navigateBack() {},
+      switchTab() {},
+      setNavigationBarTitle() {},
+      request() {},
+      useRouter() {
+        return { params: {} }
+      },
+      useDidShow() {},
+    },
+  }
+})
+
 import { advanceProgress, awardStar, clampStars, getProgressKey, getStarsKey } from './progress'
 
 describe('clampStars', () => {
@@ -60,9 +88,9 @@ describe('advanceProgress', () => {
 })
 
 describe('getStarsKey', () => {
-  it('includes date prefix', () => {
-    const key = getStarsKey()
-    expect(key).toMatch(/^stars_\d{4}-\d{2}-\d{2}$/)
+  it('includes category and date prefix', () => {
+    const key = getStarsKey('math')
+    expect(key).toMatch(/^stars_math_\d{4}-\d{2}-\d{2}$/)
   })
 })
 

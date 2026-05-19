@@ -14,6 +14,7 @@ import { getPinyinInContext } from '../../utils/pinyin'
 import { buildQuizOptions } from '../../domain/quizData'
 import { addWrongWord } from '../../domain/wrongWords'
 import { getChineseLevelsWithCustom } from '../../data/customLexicon'
+import { getActiveSkin, getTrainIcon } from '../../domain/skins'
 
 const TOTAL_STARS = DAILY_GOAL
 
@@ -128,6 +129,8 @@ export default function Level() {
     })
   }, [currentLevelData, category])
 
+  const trainIcon = useMemo(() => getTrainIcon(getActiveSkin()), [])
+
   const chestStars = currentLevelData?.items.length ?? 0
 
   const isLastItem =
@@ -187,6 +190,7 @@ export default function Level() {
         totalNodes={currentLevelData?.items.length ?? 0}
         currentNode={currentItem}
         nodeLabels={itemLabels}
+        trainIcon={trainIcon}
       />
 
       <View className="mt-2 items-center">
